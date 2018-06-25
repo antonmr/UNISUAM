@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.JOptionPane;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -51,8 +53,6 @@ public class Client extends Application {
 		this.args = args.toArray(new String[args.size()]);
 		connectToServer();
 		
-		gameStatustimer = new Timer();
-		
 		
 		super.init();
 	}
@@ -79,6 +79,7 @@ public class Client extends Application {
 	}
 	
 	private void setGameStatusTimer() {
+		gameStatustimer = new Timer();
 		gameStatustimer.scheduleAtFixedRate(new TimerTask() {
 			
 			@Override
@@ -92,10 +93,15 @@ public class Client extends Application {
 						if(isPlayerTurn) {
 							txtPlayerTurn.setText("YOUR TURN!");
 							
+							String question = gameManager.getQuestion(playerId);
+							txtQuestion.setText(question);
+							
 							if(tfAnswer.isDisabled() || btnSendAnswer.isDisabled()) {
 								tfAnswer.setDisable(false);
 								btnSendAnswer.setDisable(false);
 							}
+							
+							gameStatustimer.cancel();
 						} else {
 							txtPlayerTurn.setText("ENEMY'S TURN!");
 							
@@ -104,6 +110,18 @@ public class Client extends Application {
 								btnSendAnswer.setDisable(true);
 							}
 						}
+					} else if(gameStatus == GameStatus.GAME_ENDED) {
+						
+						boolean amIWinner = gameManager.isWinner(playerId);
+						
+						if(amIWinner) {
+							JOptionPane.showMessageDialog(null, "VOCE GANHOU!");
+						} else {
+							JOptionPane.showMessageDialog(null, "VOCE PERDEU!");
+						}
+						
+						gameStatustimer.cancel();
+						System.exit(0);
 					}
 				} catch(RemoteException re) {
 					System.err.println("Problemas com a chamada remota: " + re);
@@ -176,6 +194,8 @@ public class Client extends Application {
 						System.out.println("[" + answer + "]RESPOSTA ERRADA! BOA SORTE! :(");
 						txtAnswerMessage.setText("RESPOSTA ERRADA! BOA SORTE! :(");
 					}
+					
+					setGameStatusTimer();
 				} catch(RemoteException re) {
 					System.err.println("Problemas com a chamada remota: " + re);
 					re.printStackTrace();

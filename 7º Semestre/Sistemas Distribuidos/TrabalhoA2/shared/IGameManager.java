@@ -7,4 +7,8 @@ public interface IGameManager extends Remote {
 	GameStatus getGameStatus(int playerId) throws RemoteException;
 	boolean isPlayerTurn(int playerId) throws RemoteException;
 	boolean isAnswerCorrect(int playerId, int answer) throws RemoteException;
+	String getQuestion(int playerId) throws RemoteException;
+	boolean isWinner(int playerid) throws RemoteException;
+	
+	void getUniquePlayerIdServer2Update(int playerId) throws RemoteException;
 }
